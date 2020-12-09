@@ -1,11 +1,19 @@
 const express = require("express");
 const admin = require("firebase-admin");
 const serviceAccount = require("../serviceAccount.json");
-
+const firebase = require("firebase");
+const firebaseConfig= {
+    apiKey: "AIzaSyC_TEr-oXu6neSB5ThbuYr_ZHYEw3lCtOQ",
+    authDomain: "digital-quotes.firebaseapp.com",
+    projectId: "digital-quotes",
+    storageBucket: "digital-quotes.appspot.com",
+    messagingSenderId: "853239728556",
+    appId: "1:853239728556:web:5341e16749e92a07229209"
+}
 const router = express.Router();
 
 quotes = [];
-
+firebase.initializeApp(firebaseConfig);
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
@@ -21,6 +29,12 @@ async function updateQuotes() {
     const list = await db.collection("quotes").get();
     list.forEach(doc => quotes.push(doc.data()));
 }
+
+router.post("/login", async(req, res) => {
+    const user = await firebase.auth().signInWithEmailAndPassword(req.body.email, req.body.password);
+    const token = await user.user.getIdToken();
+    return res.status(201).json({token});
+});
 
 router.get("/quotes", async (req, res) => {
     try {

@@ -69,6 +69,9 @@ router.get("/quotes/:id", async (req, res) => {
 
 router.post("/quotes", async (req, res) => {
     try {
+        if(!isAuthorized){
+            return res.status(401).json({message: "you are not authenticated"});
+        }
         await updateQuotes();
         if (!req.body.author || !req.body.quote) {
             return res.status(400).json({message: "Bad request: missing quote or author in the request body!"});
@@ -88,6 +91,9 @@ router.post("/quotes", async (req, res) => {
 
 router.patch("/quotes/:id", async (req, res) => {
     try {
+        if(!isAuthorized){
+            return res.status(401).json({message: "you are not authenticated"});
+        }
         quotes.length = 0;
         const list = await db.collection("quotes").get();
         list.forEach(doc => quotes.push(doc.data()));
@@ -123,7 +129,9 @@ router.patch("/quotes/:id", async (req, res) => {
 
 router.delete("/quotes/:id", async (req, res) => {
     try {
-
+        if(!isAuthorized){
+            return res.status(401).json({message: "you are not authenticated"});
+        }
         const q = await db.collection('quotes').doc(req.params.id).get();
         if (!q.data()) {
             return res.status(404).json({message: "quote not found"});

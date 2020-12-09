@@ -39,13 +39,24 @@ router.post("/login", async(req, res) => {
         const user = await firebase.auth().signInWithEmailAndPassword(req.body.email, req.body.password);
         const token = await user.user.getIdToken();
         isAuthorized=true;
-        return res.status(201).json({token});
-
+        return res.status(201).json({message:"you are logged in now"});
     } catch (error) {
         return res.status(500).send(error);
     }
 });
 
+router.get("/logout", async(req, res) => {
+    try {
+        if(!isAuthorized){
+            return res.status(401).json({message:"you are not logged in"});
+        }
+        await firebase.auth().signOut();
+        isAuthorized = false;
+        return res.status(200).json({message:"you successfully logged out"});
+    } catch (error) {
+        return res.status(500).send(error);
+    }
+});
 router.get("/quotes", async (req, res) => {
     try {
         await updateQuotes();

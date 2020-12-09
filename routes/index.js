@@ -11,6 +11,7 @@ const firebaseConfig= {
     appId: "1:853239728556:web:5341e16749e92a07229209"
 }
 const router = express.Router();
+let isAuthorized = false;
 
 quotes = [];
 firebase.initializeApp(firebaseConfig);
@@ -31,9 +32,18 @@ async function updateQuotes() {
 }
 
 router.post("/login", async(req, res) => {
-    const user = await firebase.auth().signInWithEmailAndPassword(req.body.email, req.body.password);
-    const token = await user.user.getIdToken();
-    return res.status(201).json({token});
+    try {//gestione errori
+        if(req.body.password === "" || req.body.email === ""){
+            return res.status(400).json({message:"you have to insert an email and password"});
+        }
+        const user = await firebase.auth().signInWithEmailAndPassword(req.body.email, req.body.password);
+        const token = await user.user.getIdToken();
+        isAuthorized=true;
+        return res.status(201).json({token});
+
+    } catch (error) {
+        return res.status(500).send(error);
+    }
 });
 
 router.get("/quotes", async (req, res) => {
